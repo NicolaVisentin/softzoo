@@ -19,8 +19,9 @@ $ conda activate softzoo
 ### Install required packages.
 (other versions may also work but we tested with the listed versions).
 ```
+$ pip install "setuptools<66"
 $ pip install taichi==1.4.1
-$ conda install pytorch torchvision pytorch-cuda=11.7 -c pytorch -c nvidia
+$ conda install pytorch=1.13.1 torchvision pytorch-cuda=11.6 -c pytorch -c nvidia
 $ pip install -r requirements.txt
 ```
 ### Other packages.
@@ -36,6 +37,13 @@ $ pip install -r requirements.txt
 * [roma-1.3.1](https://pypi.org/project/roma/)
 * [neat-python-0.92](https://neat-python.readthedocs.io/en/latest/installation.html)
 * [opencv-python-4.7.0.72](https://pypi.org/project/opencv-python/)
+which can be easily done via
+
+```bash
+$ conda install pytorch3d=0.7.2 -c pytorch3d
+$ SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip install -r ./supplementary_requirements.txt
+```
+
 ### Install SoftZoo.
 ```
 $ git clone git@github.com:zswang666/softzoo.git
