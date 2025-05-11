@@ -1,5 +1,10 @@
 # The docker file is borrowed from https://github.com/columbia-ai-robotics/dextairity
-FROM nvidia/cuda:9.2-devel-ubuntu18.04
+# FROM nvidia/cuda:11.6.1-devel-ubuntu20.04
+FROM nvcr.io/nvidia/cuda:9.2-devel-ubuntu18.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND} \
+    TZ=Etc/UTC
 
 # Dependencies for glvnd and X11.
 RUN apt-get update \

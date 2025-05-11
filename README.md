@@ -133,10 +133,9 @@ $ python -m softzoo.tools.generate_texture --input-path ./softzoo/assets/texture
 ## Render with GL
 Other than the built-in renderer in Taichi's GGUI, we also use a rendering tool adapted from [FluidLab](https://github.com/zhouxian/FluidLab) for better visual effect. This renderer is based on GL and [NVIDIA FleX](https://developer.nvidia.com/flex#:~:text=FleX%20is%20a%20particle%20based,%2C%20fluids%2C%20clothing%2C%20etc.), and it requires compilation.
 
-First we need to download [docker](https://docs.docker.com/engine/install/ubuntu/) and [nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-docker). Please follow the instructions from both links. Also, remember to install nvidia-docker and [pybind11](https://anaconda.org/conda-forge/pybind11),
+First we need to download and install [docker](https://docs.docker.com/engine/install/ubuntu/) and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). Please follow the instructions from both links. Also, remember to install [pybind11](https://anaconda.org/conda-forge/pybind11),
 
 ```
-$ sudo apt-get install -y nvidia-docker2
 $ conda install -c conda-forge pybind11
 ```
 
