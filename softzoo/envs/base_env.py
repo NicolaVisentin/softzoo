@@ -86,6 +86,9 @@ class BaseEnv(Env):
         elif objective == 'move_forward':
             from .objectives.move_forward import MoveForward
             objective_cls = MoveForward
+        elif objective == 'embody_archetype':
+            from .objectives.embody_archetype import EmbodyArchetype
+            objective_cls = EmbodyArchetype
         elif objective in [None, 'None']:
             from .objectives.dummy import Dummy
             objective_cls = Dummy
