@@ -146,7 +146,7 @@ $ cd softzoo/engine/renderer/gl_renderer_src/
 $ bash build_docker.sh
 $ bash run_docker.sh
 # inside the docker container
-$ . /home/<username>/anaconda3/bin/activate softzoo # remember to replace the username
+$ . /opt/miniconda3/bin/activate softzoo
 $ . prepare.sh
 $ . compile.sh
 ```

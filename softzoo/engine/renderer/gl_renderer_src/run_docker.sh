@@ -1,9 +1,10 @@
 #!/bin/bash
 
 ### Run container and compile
-sudo nvidia-docker run \
+sudo docker run \
   -v ${PWD}:/workspace \
-  -v $HOME/anaconda3:$HOME/anaconda3 \
+  -v /opt/miniconda3:/opt/miniconda3 \
+  --runtime=nvidia \
   --gpus all \
   -e DISPLAY=$DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
