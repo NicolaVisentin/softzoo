@@ -2,6 +2,7 @@ import open3d as o3d
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.optim as optim
 
 from .base import Base
 from softzoo.tools.general_utils import extract_part_pca
@@ -11,6 +12,7 @@ class AnnotatedPCD(Base):
     def __init__(self,
                  env,
                  pcd_path,
+                 lr,
                  n_voxels=20,
                  passive_geometry_mul=1,
                  passive_softness_mul=1,
@@ -90,8 +92,11 @@ class AnnotatedPCD(Base):
         self.device = torch.device(device)
         self.to(self.device)
 
+        if lr > 0.0:
+            self.optim = optim.Adam(self.parameters(), lr=lr)
+
     def reset(self):
-        pass
+        self.out_cache = dict(geometry=None, softness=None, actuator=None)
 
     def forward(self, inp=None):
         actuator_directions_matrix = []
@@ -110,6 +115,9 @@ class AnnotatedPCD(Base):
         active_softness = torch.ones_like(self.occupancy)
         passive_softness = torch.ones_like(self.occupancy) * self.passive_softness_mul # NOTE: the same as active
         softness = torch.where(self.is_passive, passive_softness, active_softness)
+
+        self.out_cache['geometry'] = geometry
+        self.out_cache['actuator'] = self.actuator
 
         design = dict(
             actuator_direction=actuator_directions_matrix,

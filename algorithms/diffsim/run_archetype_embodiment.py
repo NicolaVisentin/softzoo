@@ -134,8 +134,6 @@ def main():
     # Plotting
     data_for_plots = dict(reward=[], loss=[])
 
-    print("Design types:", args.set_design_types)
-
     # Run
     for it in range(args.n_iters):
         try:

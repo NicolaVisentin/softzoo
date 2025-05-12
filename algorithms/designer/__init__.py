@@ -62,7 +62,7 @@ def make(args, env, torch_device):
     designer_kwargs = dict(
         env=env,
         n_actuators=n_actuators,
-        lr=args.designer_lr,
+        lr=args.designer_lr if args.optimize_designer else 0.0,
         device=torch_device,
     )
     if args.designer_type == 'mlp':
