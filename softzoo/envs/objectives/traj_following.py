@@ -98,7 +98,7 @@ class TrajectoryFollowing(Base):
             
             rew = self.config['weight_norm'] * rew_norm + self.config['weight_direction'] * rew_direction
         elif self.config['reward_mode'] == 'velocity_rmse':
-            rew = (v_avg - v_tgt).norm()
+            rew = (v_avg - v_tgt).norm()  # Attention: this is probably missing a minus sign
         elif self.config['reward_mode'] == 'velocity_separate_linear':
             v_avg_norm = v_avg.norm()
             v_avg_direction = v_avg / v_avg_norm
