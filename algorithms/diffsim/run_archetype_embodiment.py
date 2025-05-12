@@ -300,6 +300,7 @@ def main():
                     axes[1].grid()
                     fig.tight_layout()
                     fig.savefig(os.path.join(args.out_dir, f'episode_objective_obs_{it:04d}.png'))
+                    plt.close(fig)
 
             data_for_plots['reward'].append(ep_reward)
             data_for_plots['loss'].append(total_loss)
@@ -316,6 +317,7 @@ def main():
     ax[1].plot(np.arange(len(data_for_plots['loss'])), data_for_plots['loss'])
     fig.tight_layout()
     fig.savefig(os.path.join(args.out_dir, 'results.png'))
+    plt.close(fig)
 
 
 def make_parser():
