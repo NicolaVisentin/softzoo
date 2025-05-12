@@ -23,7 +23,7 @@ args=(
     --torch-seed $SEED
     # controller args
     --load-controller $CONTROLLER_CKPT
-    # --optimize-controller
+    --optimize-controller
     --controller-lr 0.1
     --actuation-omega 20. 100.
 )

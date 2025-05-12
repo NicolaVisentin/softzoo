@@ -286,11 +286,15 @@ def main():
                     axes[1].plot(episode_time, episode_objective_obs[:, -1, 0] - episode_objective_obs[:, 0, 0], label=r'$x$')
                     axes[1].plot(episode_time, episode_objective_obs[:, -1, 1] - episode_objective_obs[:, 0, 1], label=r'$y$')
                     axes[1].plot(episode_time, episode_objective_obs[:, -1, 2] - episode_objective_obs[:, 0, 2], label=r'$z$')
-                    amplitude_des, period_des = 0.002, 0.3
-                    # desired x evolution
-                    x_d_des = amplitude_des * torch.sin(episode_time * 2 * torch.pi / period_des)
-                    axes[1].plot(episode_time, x_d_des, linestyle=":", label=r'$x^d$')
-                    axes[1].legend()
+                    # plot the norm of x-y-z
+                    rel_dist_norm = torch.norm(episode_objective_obs[:, -1, :] - episode_objective_obs[:, 0, :], dim=1)
+                    print("mean of rel_dist_norm:", rel_dist_norm.mean().item(), "amplitude estimate:", (rel_dist_norm - rel_dist_norm.mean()).abs().max().item())
+                    axes[1].plot(episode_time, rel_dist_norm, label=r'$\sqrt{x^2 + y^2 + z^2}$')
+                    offset_des, amplitude_des, period_des = 0.069, 0.030, 0.3
+                    # target evolution
+                    target = offset_des + amplitude_des * torch.cos(episode_time * 2 * torch.pi / period_des)
+                    axes[1].plot(episode_time, target, linestyle=":", linewidth=2.5, color="tab:red", label=r'Target')
+                    axes[1].legend(fontsize="small")
                     axes[1].set_xlabel('Time')
                     axes[1].set_ylabel('Position Difference')
                     axes[1].grid()
