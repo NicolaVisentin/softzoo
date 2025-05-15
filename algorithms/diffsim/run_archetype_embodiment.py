@@ -288,7 +288,7 @@ def main():
                     rel_dist_norm = torch.norm(episode_objective_obs[:, -1, :] - episode_objective_obs[:, 0, :], dim=1)
                     print("mean of rel_dist_norm:", rel_dist_norm.mean().item(), "amplitude estimate:", (rel_dist_norm - rel_dist_norm.mean()).abs().max().item())
                     axes[1].plot(episode_time, rel_dist_norm, label=r'$\sqrt{x^2 + y^2 + z^2}$')
-                    offset_des, amplitude_des, period_des = 0.069, 0.030, 0.3
+                    offset_des, amplitude_des, period_des = 0.069, 0.020, 0.15
                     # target evolution
                     target = offset_des + amplitude_des * torch.cos(episode_time * 2 * torch.pi / period_des)
                     axes[1].plot(episode_time, target, linestyle=":", linewidth=2.5, color="tab:red", label=r'Target')
@@ -354,7 +354,7 @@ def make_parser():
     parser.add_argument('--loss-types', type=str, nargs='+', default=['FinalStepCoMLoss'],
                         choices=['FinalStepCoMLoss', 'TrajectoryFollowingLoss', 'PerStepCoVLoss',
                                  'AnimatedEMDLoss', 'VelocityFollowingLoss', 'WaypointFollowingLoss',
-                                 'RotationLoss', 'ThrowingObjectLoss', 'ObjectVelocityLoss'])
+                                 'RotationLoss', 'ThrowingObjectLoss', 'ObjectVelocityLoss', 'EmbodyArchetypeLoss'])
     parser.add_argument('--loss-coefs', type=float, nargs='+', default=[1.])
     parser.add_argument('--optimize-designer', action='store_true', default=False)
     parser.add_argument('--set-design-types', type=str, nargs='+', default=['geometry', 'softness', 'actuator', 'actuator_direction'],
@@ -470,6 +470,8 @@ def make_loss(args, env, torch_device):
             loss_config = dict(x_mul=args.obj_x_mul, obj_particle_id=args.obj_particle_id)
         elif loss_type == 'ObjectVelocityLoss':
             loss_config = dict(v_mul=args.obj_v_mul, obj_particle_id=args.obj_particle_id)
+        elif loss_type == 'EmbodyArchetypeLoss':
+            loss_config = dict()
         else:
             raise ValueError(f'Unrecognized loss type {loss_type}')
         loss_configs[loss_type] = loss_config

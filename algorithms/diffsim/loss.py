@@ -1,5 +1,6 @@
 from typing import Dict
 import os
+from math import pi
 import numpy as np
 import open3d as o3d
 import geomloss
@@ -726,3 +727,50 @@ class ObjectVelocityLoss(Loss):
                 v_mul = ti.Vector(self.v_mul, F_DTYPE) / self.data['n_object_particles'][None]
                 p_loss = -(self.env.sim.solver.v[s_local, p] * v_mul).sum()
                 self.data['loss'][s] += p_loss
+
+@ti.data_oriented
+class EmbodyArchetypeLoss(Loss):
+    def __init__(self, parent, env, x_mul=[1., 0., 0.]):
+        super().__init__(parent, env)
+
+        self.data = dict(
+            loss=ti.field(dtype=F_DTYPE, shape=(self.env.sim.solver.max_substeps), needs_grad=True),
+            n_robot_particles=ti.field(dtype=F_DTYPE, shape=(), needs_grad=True),
+        )
+
+        offset_des, amplitude_des, period_des = 0.069, 0.020, 0.15
+        self.offset_des = offset_des
+        self.amplitude_des = amplitude_des
+        self.period_des = period_des
+
+    def reset(self):
+        super().reset()
+
+    def compute_final_step_loss(self, s):
+        self._compute_n_robot_particles()
+        s_local = self.get_s_local(s)
+        self._compute_loss(s, s_local)
+
+    def compute_final_step_grad(self, s):
+        s_local = self.get_s_local(s)
+        self._compute_loss.grad(s, s_local)
+
+    @ti.kernel
+    def _compute_loss(self, s: I_DTYPE, s_local: I_DTYPE):
+        # get two points
+        p_min = self.env.design_space.orientation_data['min_p']
+        p_max = self.env.design_space.orientation_data['max_p']
+        # get time
+        time = self.env.sim.solver.sim_t
+
+        # extract positions
+        x_min = self.env.sim.solver.x[s_local, self.env.design_space.p_start + p_min]
+        x_max = self.env.sim.solver.x[s_local, self.env.design_space.p_start + p_max]
+
+        # relative distance between the two particles
+        rel_dist = x_max - x_min
+        rel_dist_norm = rel_dist.norm()
+        target = self.offset_des + self.amplitude_des * ti.math.cos(time * 2 * pi / self.period_des)
+        loss = (rel_dist_norm - target)**2
+
+        self.data['loss'][s] += 1e2 * loss
