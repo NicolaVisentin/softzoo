@@ -15,19 +15,36 @@ class EmbodyArchetype(Base):
         assert self.max_episode_steps <= self.env.max_steps
         assert self.config['max_episode_steps'] != torch.inf, 'Maximal episode step is infinite'
 
-        offset_des, amplitude_des, period_des = 0.069, 0.020, 0.15
-        self.offset_des = offset_des
-        self.amplitude_des = amplitude_des
-        self.period_des = period_des
+        self.offset_des = config["offset_des"]
+        self.amplitude_des = config["amplitude_des"]
+        self.period_des = config["period_des"]
 
     def reset(self):
         self.step_cnt = 0
 
     def get_obs(self, s):
-        x, mask = self.env.design_space.get_x(s, keep_mask=True)
+        # get time
+        time = torch.tensor(self.env.sim.solver.sim_t)
+
         p_min = self.env.design_space.orientation_data['min_p']
         p_max = self.env.design_space.orientation_data['max_p']
-        obs = torch.stack([x[p_min, :], x[p_max, :]], dim=0)
+
+        x, mask = self.env.design_space.get_x(s, keep_mask=True)
+        x_min, x_max = x[p_min, :], x[p_max, :]
+
+        # s_local = self.env.sim.solver.get_cyclic_s(s)
+        # p_start = self.env.design_space.p_start
+        # x_min_vector = self.env.sim.solver.x[s_local, p_start + p_min]
+        # x_max_vector = self.env.sim.solver.x[s_local, p_start + p_max]
+        # x_min = torch.tensor(x_min_vector)
+        # x_max = torch.tensor(x_max_vector)
+
+        # compute the target
+        target = self.offset_des + self.amplitude_des * torch.cos(time * 2 * torch.pi / self.period_des)
+        # repeat three times
+        target = target[None].repeat(3)
+
+        obs = torch.stack([x_min, x_max, target], dim=0)
         return obs
 
     def get_reward(self, s):
@@ -35,16 +52,16 @@ class EmbodyArchetype(Base):
         
         # get observation
         obs = self.get_obs(s)
-        # get time
-        time = torch.tensor(self.env.sim.solver.sim_t, dtype=obs.dtype, device=obs.device)
+        # extract the parts
+        x_min = obs[0, :]
+        x_max = obs[1, :]
+        target = obs[2, 0]
 
         # relative distance between the two particles
-        rel_dist = obs[-1, :] - obs[0, :]
+        rel_dist = x_max - x_min
         rel_dist_norm = torch.norm(rel_dist, dim=0)
-        target = self.offset_des + self.amplitude_des * torch.cos(time * 2 * torch.pi / self.period_des)
         loss = torch.square(rel_dist_norm - target)
 
-        # print('embody archetype loss:', loss)
         rew = -loss.item()
 
         return rew

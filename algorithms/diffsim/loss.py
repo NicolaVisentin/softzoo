@@ -747,21 +747,29 @@ class EmbodyArchetypeLoss(Loss):
         super().reset()
 
     def compute_final_step_loss(self, s):
-        self._compute_n_robot_particles()
-        s_local = self.get_s_local(s)
-        self._compute_loss(s, s_local)
+        self.compute_per_step_loss(s)
 
     def compute_final_step_grad(self, s):
+        self.compute_per_step_grad(s)
+
+    def compute_per_step_loss(self, s):
+        self._compute_n_robot_particles()
+        # get time
+        time = self.env.substep_dt * s
         s_local = self.get_s_local(s)
-        self._compute_loss.grad(s, s_local)
+        self._compute_loss(s, s_local, time)
+
+    def compute_per_step_grad(self, s):
+        # get time
+        time = self.env.substep_dt * s
+        s_local = self.get_s_local(s)
+        self._compute_loss.grad(s, s_local, time)
 
     @ti.kernel
-    def _compute_loss(self, s: I_DTYPE, s_local: I_DTYPE):
+    def _compute_loss(self, s: I_DTYPE, s_local: I_DTYPE, t: F_DTYPE):
         # get two points
         p_min = self.env.design_space.orientation_data['min_p']
         p_max = self.env.design_space.orientation_data['max_p']
-        # get time
-        time = self.env.sim.solver.sim_t
 
         # extract positions
         x_min = self.env.sim.solver.x[s_local, self.env.design_space.p_start + p_min]
@@ -770,7 +778,7 @@ class EmbodyArchetypeLoss(Loss):
         # relative distance between the two particles
         rel_dist = x_max - x_min
         rel_dist_norm = rel_dist.norm()
-        target = self.offset_des + self.amplitude_des * ti.math.cos(time * 2 * pi / self.period_des)
+        target = self.offset_des + self.amplitude_des * ti.math.cos(t * 2 * pi / self.period_des)
         loss = (rel_dist_norm - target)**2
 
-        self.data['loss'][s] += 1e2 * loss
+        self.data['loss'][s] += loss

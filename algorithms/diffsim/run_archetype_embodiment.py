@@ -270,32 +270,37 @@ def main():
                 # plot the episode objective observation
                 if 'objective' in obs.keys():
                     # plot the positions vs. time
-                    fig, axes = plt.subplots(2, 1, figsize=(5, 5))
+                    fig, axes = plt.subplots(3, 1, figsize=(5, 7))
                     axes[0].set_title('Episode Positions')
-                    for i in range(episode_objective_obs.shape[1]):
+                    for i in range(2):
                         axes[0].plot(episode_time, episode_objective_obs[:, i, 0], label=r'$x_' + str(i) + r'$')
                         axes[0].plot(episode_time, episode_objective_obs[:, i, 1], label=r'$y_' + str(i) + r'$')
                         axes[0].plot(episode_time, episode_objective_obs[:, i, 2], label=r'$z_' + str(i) + r'$')
-                    axes[0].legend()
+                    axes[0].legend(fontsize="small", ncol=2)
                     axes[0].set_xlabel('Time')
                     axes[0].set_ylabel('Position')
                     axes[0].grid()
                     axes[1].set_title('Episode Relative Position Difference')
-                    axes[1].plot(episode_time, episode_objective_obs[:, -1, 0] - episode_objective_obs[:, 0, 0], label=r'$x$')
-                    axes[1].plot(episode_time, episode_objective_obs[:, -1, 1] - episode_objective_obs[:, 0, 1], label=r'$y$')
-                    axes[1].plot(episode_time, episode_objective_obs[:, -1, 2] - episode_objective_obs[:, 0, 2], label=r'$z$')
+                    # axes[1].plot(episode_time, episode_objective_obs[:, -1, 0] - episode_objective_obs[:, 0, 0], label=r'$x$')
+                    # axes[1].plot(episode_time, episode_objective_obs[:, -1, 1] - episode_objective_obs[:, 0, 1], label=r'$y$')
+                    # axes[1].plot(episode_time, episode_objective_obs[:, -1, 2] - episode_objective_obs[:, 0, 2], label=r'$z$')
                     # plot the norm of x-y-z
-                    rel_dist_norm = torch.norm(episode_objective_obs[:, -1, :] - episode_objective_obs[:, 0, :], dim=1)
-                    print("mean of rel_dist_norm:", rel_dist_norm.mean().item(), "amplitude estimate:", (rel_dist_norm - rel_dist_norm.mean()).abs().max().item())
-                    axes[1].plot(episode_time, rel_dist_norm, label=r'$\sqrt{x^2 + y^2 + z^2}$')
-                    offset_des, amplitude_des, period_des = 0.069, 0.020, 0.15
                     # target evolution
-                    target = offset_des + amplitude_des * torch.cos(episode_time * 2 * torch.pi / period_des)
-                    axes[1].plot(episode_time, target, linestyle=":", linewidth=2.5, color="tab:red", label=r'Target')
+                    rel_dist_norm = torch.norm(episode_objective_obs[:, 1, :] - episode_objective_obs[:, 0, :], dim=1)
+                    target = episode_objective_obs[:, 2, 0]
+                    print("mean of rel_dist_norm:", rel_dist_norm.mean().item(), "amplitude estimate:", (rel_dist_norm - rel_dist_norm.mean()).abs().max().item())
+                    axes[1].plot(episode_time, target, linewidth=3.0, label=r'Target')
+                    axes[1].plot(episode_time, rel_dist_norm, label=r'Actual')
                     axes[1].legend(fontsize="small")
                     axes[1].set_xlabel('Time')
                     axes[1].set_ylabel('Position Difference')
                     axes[1].grid()
+                    loss = (rel_dist_norm - target)**2
+                    print("Manually computed loss over the simulation time:", loss.sum().item())
+                    axes[2].plot(episode_time, loss, label=r'Loss')
+                    axes[2].set_xlabel('Time')
+                    axes[2].set_ylabel('Loss')
+                    axes[2].grid()
                     fig.tight_layout()
                     fig.savefig(os.path.join(args.out_dir, f'episode_objective_obs_{it:04d}.png'))
                     plt.close(fig)
@@ -427,6 +432,11 @@ def make_env(args):
     if args.render_every_iter > 0:
         cfg_kwargs['ENVIRONMENT.use_renderer'] = True
     cfg_kwargs["ENVIRONMENT.objective"] = args.objective
+    if args.objective == "embody_archetype":
+        offset_des, amplitude_des, period_des = 0.069, 0.020, 0.15
+        cfg_kwargs['ENVIRONMENT.objective_config.offset_des'] = offset_des
+        cfg_kwargs['ENVIRONMENT.objective_config.amplitude_des'] = amplitude_des
+        cfg_kwargs['ENVIRONMENT.objective_config.period_des'] = period_des
     if args.objective_reward_mode not in [None, 'None']:
         cfg_kwargs['ENVIRONMENT.objective_config.reward_mode'] = args.objective_reward_mode
     cfg_kwargs["ENVIRONMENT.observation_space"] = ["time", "com", "objective"]
