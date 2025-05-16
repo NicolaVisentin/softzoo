@@ -15,19 +15,20 @@ args=(
     --env-config-file ${ENV}.yaml
     --save-every-iter 1
     --render-every-iter 1
-    --n-iters 31
+    --n-iters 90
     --n-frames 200
     --loss-types EmbodyArchetypeLoss
     # designer args
-    # --optimize-designer
-    # --optimize-design-types geometry actuator
+    --optimize-designer
+    --optimize-design-types geometry actuator
     --designer-type annotated_pcd
+    --designer-lr 0.001
     --annotated-pcd-path ./softzoo/assets/meshes/pcd/${ANIMAL}.pcd
     --annotated-pcd-passive-geometry-mul 0.2
     # controller args
     --load-controller $CONTROLLER_CKPT
     --optimize-controller
-    --controller-lr 10
+    --controller-lr 0.1
     --actuation-omega 20. 100.
     # --train-actuation-omega
     # --train-actuation-strength
