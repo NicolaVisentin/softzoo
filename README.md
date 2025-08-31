@@ -37,6 +37,7 @@ $ pip install -r requirements.txt
 * [roma-1.3.1](https://pypi.org/project/roma/)
 * [neat-python-0.92](https://neat-python.readthedocs.io/en/latest/installation.html)
 * [opencv-python-4.7.0.72](https://pypi.org/project/opencv-python/)
+
 which can be easily done via
 
 ```bash
