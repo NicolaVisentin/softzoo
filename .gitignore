@@ -3,6 +3,7 @@ local/
 *.pth
 *.pcd
 imgui.ini
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

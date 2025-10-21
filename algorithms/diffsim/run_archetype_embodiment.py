@@ -24,7 +24,7 @@ def main():
     np.random.seed(args.seed)
     torch.manual_seed(args.torch_seed)
 
-    ti.init(arch=ti.cuda, device_memory_fraction=0.8)
+    ti.init(arch=ti.cuda, device_memory_fraction=0.9)
 
     if args.load_args:
         with open(args.load_args, 'r') as fp:
@@ -40,7 +40,7 @@ def main():
     if args.eval:
         args.optimize_controller = False
         args.optimize_designer = False
-
+    
     # Instantiate environment
     env = make_env(args)
     torch_device = 'cuda' if args.non_taichi_device == 'torch_gpu' else 'cpu'
